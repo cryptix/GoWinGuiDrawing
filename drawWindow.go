@@ -3,9 +3,7 @@ package main
 import (
 	"github.com/lxn/walk"
 	"image"
-	"image/png"
-	"log"
-	"os"
+	_ "image/png"
 )
 
 type drawWindow struct {
@@ -18,7 +16,7 @@ func (mw *drawWindow) drawStuff(canvas *walk.Canvas, updateBounds walk.Rectangle
 
 	bmp, err := walk.NewBitmap(bounds.Size())
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	succeeded := false
@@ -36,26 +34,14 @@ func (mw *drawWindow) drawStuff(canvas *walk.Canvas, updateBounds walk.Rectangle
 
 	fractalBmp, err := walk.NewBitmapFromImage(cv)
 	if err != nil {
-		panic(err)
+		return err
 	}
+	defer fractalBmp.Dispose()
 
-	brush, err := walk.NewBitmapBrush(fractalBmp)
+	err = canvas.DrawImage(fractalBmp, walk.Point{0, 0})
 	if err != nil {
-		panic(err)
+		return err
 	}
-	defer brush.Dispose()
-
-	if err := canvas.FillRectangle(brush, bounds); err != nil {
-		panic(err)
-	}
-	outFname := "fractal.png"
-	outFile, err := os.Create(outFname)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer outFile.Close()
-	log.Println("Saved ", outFname)
-	png.Encode(outFile, cv)
 
 	return nil
 }
